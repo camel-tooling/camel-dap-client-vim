@@ -3,7 +3,7 @@
 ![A breakpoint hit on a Camel route endpoint](./images/vimdap.gif)
 
 # How to debug camel with vim
-I just got the debug integration for camel in vim running using vimspector. In order to not forget the config, I decided to quickly compile this readme.
+I just got the debug integration for camel in vim running using vimspector(https://github.com/puremourning/vimspector). In order to not forget the config, I decided to quickly compile this readme.
 
 The following manual uses `Vi IMproved 9.0` and `:vim-plug` plugin manager.
 
@@ -18,25 +18,11 @@ Inside `.vimrc` file:
 
 `:PlugInstall`
 
-# Dependencies:
-It has maven dependencies so I might need to install maven to execute the camel examples
-- https://maven.apache.org/download.cgi
-- curl -LO https://dlcdn.apache.org/maven/maven-3/3.8.6/binaries/apache-maven-3.8.6-bin.tar.gz
-- tar -xf apache-maven-3.8.6-bin.tar.gz
-			  
-Add  mvn command to the happy PATH:
-- export PATH=$PATH:apache-maven-3.8.6/bin
-
 # How to get camel DAPserver.jar file?
-- I found 2 releases of camel DAP server here - https://github.com/camel-tooling/camel-debug-adapter/tags but it doesn't contain 
-  any jar files 
-- curl -LO https://github.com/camel-tooling/camel-debug-adapter/archive/refs/tags/0.4.0.tar.gz 
-- Download the above file and then extract it and then run `mvn clean install` on the directory since it has pom.xml file.
-- In the target directory you will see camel DAP derver jar file `~/camel-debug-adapter-0.4.0/target/camel-dap-server-0.4.0.jar` 
-  after the succesful completion of mvn command
+- I found 2 releases of camel DAP server here - https://github.com/camel-tooling/ 
+  camel-debug-adapter/tags but it doesn't contain any jar files 
+- Download from Maven Central repository - https://repo1.maven.org/maven2/com/github/camel-tooling/camel-dap-server/0.4.0/camel-dap-server-0.4.0.jar
 	
-
-
 # Inside .vimrc file:
 ```
   call plug#begin()
@@ -66,11 +52,11 @@ Add  mvn command to the happy PATH:
 
 # Configure camel-example Debug Gadget
 Place this content in `cust_camel-debug-adapter.json` in your vimspector directory (path might be different for you)
-
+```sh
 cd ~/.vim/plugged/vimspector/gadgets/linux/.gadgets.d
-
-Vimspector adapter configuration:
 ```
+Vimspector adapter configuration:
+```json
 {
   "adapters": {
     "cust_camel-debug-adapter": {
@@ -87,7 +73,7 @@ Vimspector adapter configuration:
  Create a file called `.vimspector.json` in the project root and then place the following content
 
  Vimspector debugger configuration:
- ```
+ ```json
 {
   "configurations": {
     "Camel Debug Adapter - Attach": {
@@ -105,21 +91,23 @@ Vimspector adapter configuration:
   }
 }
 ```
-
 # Troubleshooting
 
 ## In terminal window1:
 
 * To start the debugger port:
-- cd ~/camel-examples/examples/main
+```sh
+  cd ~/camel-examples/examples/main
+```
 - mvn camel:run -Pcamel.debug
 
 ## In terminal window2:
-
-- cd ~/camel-examples/examples/main
-- vim src/main/java/org/apache/camel/example/MyBean.java
-- Add the following cotent inside `MyBean.java` file:
+```sh
+  cd ~/camel-examples/examples/main
 ```
+- vim src/main/java/org/apache/camel/example/MyBean.java
+- Add the following content inside `MyBean.java` file:
+```java
 package org.apache.camel.example;
 
 public class MyBean {
@@ -141,7 +129,7 @@ public class MyBean {
 ```
 - vim src/main/java/org/apache/camel/example/MyRouteBuilder.java 
 - Inside `MyRouteBuilder.java` file:
-```
+```java
 package org.apache.camel.example;
 
 import org.apache.camel.builder.RouteBuilder;
@@ -155,8 +143,6 @@ public class MyRouteBuilder extends RouteBuilder {
             .log("${body}")
             .bean("myBean", "bye")
             .log("${body}");
-
-
     }
 }
 ```
@@ -168,11 +154,11 @@ Now everything is in place. Open the main MyRouteBuilder file and start debuggin
 | `dt`         | To set the breakpoints
 | `dc`         | To go to the next breakpoint
 | `ctrl+ww`    | To move around the vimspector 
-
 `:VimspectortToggleLog` to see the vimspector logs.
 `cat $HOME/.vimspector.log` same logs can also be seen here
 
-# HUMAN mode
+# Mappings
+The goal is to provide keymapping to use controllers of the debugger more easily. Try the following mappings, by adding the following before loading vimspector:
 ```viml
 let g:vimspector_enable_mappings = 'HUMAN'
 ```
@@ -187,10 +173,3 @@ let g:vimspector_enable_mappings = 'HUMAN'
 | `<leader>F9` | `<Plug>VimspectorToggleConditionalBreakpoint` | Toggle conditional line breakpoint or logpoint on the current line.
 | `F8`         | `<Plug>VimspectorAddFunctionBreakpoint`       | Add a function breakpoint for the expression under cursor
 | `<leader>F8` | `<Plug>VimspectorRunToCursor`                 | Run to Cursor
-
-
-
-
-
-
-
