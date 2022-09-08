@@ -2,7 +2,7 @@
 
 ![A breakpoint hit on a Camel route endpoint](./images/vimdap.gif)
 
-# How to debug camel with vim
+# How to debug Camel with vim
 I just got the debug integration for camel in vim running using vimspector(https://github.com/puremourning/vimspector). In order to not forget the config, I decided to quickly compile this readme.
 
 The following manual uses `Vi IMproved 9.0` and `:vim-plug` plugin manager.
@@ -18,13 +18,15 @@ Inside `.vimrc` file:
 
 `:PlugInstall`
 
-# How to get camel DAPserver.jar file?
-- I found 2 releases of camel DAP server here - https://github.com/camel-tooling/ 
-  camel-debug-adapter/tags but it doesn't contain any jar files 
-- Download from Maven Central repository - https://repo1.maven.org/maven2/com/github/camel-tooling/camel-dap-server/0.4.0/camel-dap-server-0.4.0.jar
-	
+# How to get Camel Debug Adapter server.jar file?
+- I found 2 releases of camel DAP server here - https://github.com/camel-tooling/camel-debug-adapter/tags but it doesn't contain any jar files. To get a jar file either you can compile the source or download from the Maven Central repository. 
+- To download from Maven Central repository
+```sh
+cd /home
+curl -LO https://repo1.maven.org/maven2/com/github/camel-tooling/camel-dap-server/0.4.0/camel-dap-server-0.4.0.jar
+  ```
 # Inside .vimrc file:
-```
+```viml
   call plug#begin()
   " The default plugin directory will be as follows:
   "   - Vim (Linux/macOS): '~/.vim/plugged'
@@ -40,7 +42,7 @@ Inside `.vimrc` file:
   Plug 'puremourning/vimspector'
   call plug#end()
   
-  " https://github.com/puremourning/vimspector/blob/master/README.md#human-mode"
+  " https://github.com/puremourning/vimspector/blob/master/README.md#human-mode
   let g:vimspector_enable_mappings = 'HUMAN'
 
   " Vimspector key mappings 
@@ -63,7 +65,7 @@ Vimspector adapter configuration:
          "command": [
         "java",
         "-jar",
-        "/home/camel-debug-adapter-0.4.0/target/camel-dap-server-0.4.0.jar"
+        "/home/camel-dap-server-0.4.0.jar"
          ]
     }
   }
@@ -91,17 +93,36 @@ Vimspector adapter configuration:
   }
 }
 ```
-# Troubleshooting
+# How to attach camel application to vimspector for debugging
 
-## In terminal window1:
+* To test the camel application debugging need a working example. Lot of good examples are provided in this repo, [camel-examples](https://github.com/apache/camel-examples).
 
-* To start the debugger port:
-```sh
-  cd ~/camel-examples/examples/main
+* To enable Camel Textual Route debugging, you need to launch this examples with the profile `camel.debug`.
+
+* I have specifically used [example-main](https://github.com/apache/camel-examples/tree/main/examples/main) in this setup.
+
+* You can also debug [example-basic](https://github.com/apache/camel-examples/tree/main/examples/basic) but only after adding the following lines to `pom.xml` and compiling the source with `mvn clean install`
+```xml
+<profiles>
+        <profile>
+            <id>camel.debug</id>
+            <activation>
+                <property>
+                    <name>camel.debug</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-debug</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 ```
-- mvn camel:run -Pcamel.debug
 
-## In terminal window2:
+## Make the following changes and run your camel application in window-1
 ```sh
   cd ~/camel-examples/examples/main
 ```
@@ -146,6 +167,19 @@ public class MyRouteBuilder extends RouteBuilder {
     }
 }
 ```
+* Compile the source to reflect the new changes
+ ```sh
+ mvn compile
+ ```
+* Launch this example with the profile `camel.debug`
+```sh
+ mvn camel:run -Pcamel.debug
+```
+## Attach this camel example to Vimspector for Camel Textual Route Debugging in window-2
+* Open this file in vim `src/main/java/org/apache/camel/example/MyRouteBuilder.java` and then use the following keys to set the breakpoints. 
+* Start the Camel debugger by again using the following keys. 
+* Enter `1099` as port number when it is prompted for user input in vimspector.
+* Now you could able to debug your camel application and again use the following key mappings to instruct the debugger. 
 # Debug It
 Now everything is in place. Open the main MyRouteBuilder file and start debugging by `Esc + \`:
 | Key          | Function
@@ -158,7 +192,9 @@ Now everything is in place. Open the main MyRouteBuilder file and start debuggin
 `cat $HOME/.vimspector.log` same logs can also be seen here
 
 # Mappings
-The goal is to provide keymapping to use controllers of the debugger more easily. Try the following mappings, by adding the following before loading vimspector:
+The goal is to provide keymapping to use controllers of the debugger more easily. To know more about these mappings please follow this doc - https://github.com/puremourning/vimspector/blob/master/README.md#human-mode 
+
+Try the following mappings, by adding the following before loading vimspector:
 ```viml
 let g:vimspector_enable_mappings = 'HUMAN'
 ```
